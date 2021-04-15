@@ -95,6 +95,8 @@ external class List {
 	fun elementAt(index: num): any
 
 	fun join(splitter: str): str
+
+	fun insert(index: num, value)
 }
 
 external class Map {

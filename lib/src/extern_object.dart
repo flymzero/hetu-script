@@ -202,6 +202,12 @@ class HTList extends HTExternObject<List> {
                 Map<String, dynamic> namedArgs = const {},
                 List<HTTypeId> typeArgs = const []}) =>
             externObject.join(positionalArgs.first);
+      case 'insert':
+        return (
+                {List<dynamic> positionalArgs = const [],
+                Map<String, dynamic> namedArgs = const {},
+                List<HTTypeId> typeArgs = const []}) =>
+            externObject.insert(positionalArgs[0], positionalArgs[1]);
       default:
         throw HTErrorUndefined(varName);
     }
