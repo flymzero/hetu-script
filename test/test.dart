@@ -4,12 +4,8 @@ void main() async {
   var hetu = Hetu();
   await hetu.init();
   await hetu.eval(r'''
-      fun whenSwitch() {
-        var i = 4
-          when (i % 2) {
-            0: {print('even')}
-            1: {print('odd')}
-          }
+      fun escape() {
+          print('a\nb')
       }
-      ''', invokeFunc: 'whenSwitch');
+      ''', invokeFunc: 'escape');
 }
