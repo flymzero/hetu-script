@@ -86,6 +86,8 @@ external class List {
 	fun join(splitter: str): str
 
 	fun insert(index: num, value)
+
+	fun remove(value)
 }
 
 external class Map {

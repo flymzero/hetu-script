@@ -208,6 +208,12 @@ class HTList extends HTExternObject<List> {
                 Map<String, dynamic> namedArgs = const {},
                 List<HTTypeId> typeArgs = const []}) =>
             externObject.insert(positionalArgs[0], positionalArgs[1]);
+      case 'remove':
+        return (
+                {List<dynamic> positionalArgs = const [],
+                Map<String, dynamic> namedArgs = const {},
+                List<HTTypeId> typeArgs = const []}) =>
+            externObject.remove(positionalArgs[0]);
       default:
         throw HTErrorUndefined(varName);
     }
@@ -216,8 +222,10 @@ class HTList extends HTExternObject<List> {
 
 /// Mirror object for dart map.
 class HTMap extends HTExternObject<Map> {
-  HTMap(Map value, {HTTypeId keyType = HTTypeId.ANY, HTTypeId valueType = HTTypeId.ANY})
-      : super(value, typeid: HTTypeId(HTLexicon.list, arguments: [keyType, valueType]));
+  HTMap(Map value,
+      {HTTypeId keyType = HTTypeId.ANY, HTTypeId valueType = HTTypeId.ANY})
+      : super(value,
+            typeid: HTTypeId(HTLexicon.list, arguments: [keyType, valueType]));
 
   @override
   final typeid = HTTypeId.map;
