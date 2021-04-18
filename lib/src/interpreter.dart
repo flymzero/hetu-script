@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:pub_semver/pub_semver.dart';
 
 import 'namespace.dart';
@@ -32,7 +34,10 @@ abstract class Interpreter {
   /// 全局命名空间
   late HTNamespace global;
 
-  Interpreter({bool debugMode = false, HTErrorHandler? errorHandler, HTModuleHandler? moduleHandler}) {
+  Interpreter(
+      {bool debugMode = false,
+      HTErrorHandler? errorHandler,
+      HTModuleHandler? moduleHandler}) {
     this.debugMode = debugMode;
     this.errorHandler = errorHandler ?? DefaultErrorHandler();
     this.moduleHandler = moduleHandler ?? DefaultModuleHandler();
@@ -42,7 +47,8 @@ abstract class Interpreter {
       {bool coreModule = true,
       List<HTExternalClass> externalClasses = const [],
       Map<String, Function> externalFunctions = const {},
-      Map<String, HTExternalFunctionTypedef> externalFunctionTypedef = const {}}) async {
+      Map<String, HTExternalFunctionTypedef> externalFunctionTypedef =
+          const {}}) async {
     // load classes and functions in core library.
     // TODO: dynamic load needed core lib in script
     if (coreModule) {
@@ -155,6 +161,19 @@ abstract class Interpreter {
       }
 
       return HTMap(object, keyType: keyType, valueType: valueType);
+    } else if (object is Timer) {
+      final typeString = 'Timer';
+      final id = HTTypeId.parseBaseTypeId(typeString);
+      if (containsExternalClass(id)) {
+        try {
+          // final externClass = fetchExternalClass(typeid.id);
+          return HTExternObject(object, typeid: HTTypeId(id));
+        } on HTErrorUndefined {
+          return HTExternObject(object);
+        }
+      }
+
+      return HTExternObject(object);
     } else {
       final typeString = object.runtimeType.toString();
       final id = HTTypeId.parseBaseTypeId(typeString);
