@@ -782,11 +782,20 @@ class Hetu extends Interpreter {
         _curCode.skip(endIp);
       }
     } else {
+      var condition = false;
       for (final key in cases.keys) {
         if (key) {
           final distance = cases[key]!;
           _curCode.skip(distance);
+          condition = true;
           break;
+        }
+      }
+      if (!condition) {
+        if (elseBranchIp > 0) {
+          _curCode.skip(elseBranchIp);
+        } else {
+          _curCode.skip(endIp);
         }
       }
     }
