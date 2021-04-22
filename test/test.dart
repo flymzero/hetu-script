@@ -12,9 +12,6 @@ void main() async {
       }
       return 'missed'
     }
-
     print(getID(5 - 2))
-
-  
     ''', codeType: CodeType.script);
 }

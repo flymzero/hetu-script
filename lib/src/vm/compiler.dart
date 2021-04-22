@@ -1393,9 +1393,9 @@ class Compiler extends Parser with ConstTable, HetuRef {
         advance(1);
         match(HTLexicon.colon);
         if (curTok.type == HTLexicon.curlyLeft) {
-          elseBranch = _parseBlock(HTLexicon.whenStmt, endOfExec: true);
+          elseBranch = _parseBlock(HTLexicon.whenStmt);
         } else {
-          elseBranch = _parseStmt(codeType: CodeType.function, endOfExec: true);
+          elseBranch = _parseStmt(codeType: CodeType.function);
         }
       } else {
         final caseExpr = _parseExpr(endOfExec: true);
@@ -1403,9 +1403,9 @@ class Compiler extends Parser with ConstTable, HetuRef {
         match(HTLexicon.colon);
         late final caseBranch;
         if (curTok.type == HTLexicon.curlyLeft) {
-          caseBranch = _parseBlock(HTLexicon.whenStmt, endOfExec: true);
+          caseBranch = _parseBlock(HTLexicon.whenStmt);
         } else {
-          caseBranch = _parseStmt(codeType: CodeType.function, endOfExec: true);
+          caseBranch = _parseStmt(codeType: CodeType.function);
         }
         branches.add(caseBranch);
       }
@@ -1413,7 +1413,6 @@ class Compiler extends Parser with ConstTable, HetuRef {
 
     match(HTLexicon.curlyRight);
 
-    final offsetIp = (condition?.length ?? 0) + 3;
     bytesBuilder.addByte(HTOpCode.anchor);
     if (condition != null) {
       bytesBuilder.add(condition);
@@ -1435,12 +1434,17 @@ class Compiler extends Parser with ConstTable, HetuRef {
     } else {
       bytesBuilder.add(_uint16(0)); // has no else
     }
-    final endIp = curIp + (elseBranch?.length ?? 0) + 3;
+    final endIp = curIp + (elseBranch?.length ?? 0);
     bytesBuilder.add(_uint16(endIp));
+
+    // calculate the length of the code, for goto the specific location of branches
+    var offsetIp = (condition?.length ?? 0) + 3 + branches.length * 2 + 4;
 
     for (final expr in cases) {
       bytesBuilder.add(expr);
+      offsetIp += expr.length;
     }
+
     for (var i = 0; i < branches.length; ++i) {
       bytesBuilder.add(branches[i]);
       bytesBuilder.addByte(HTOpCode.goto);
@@ -1449,8 +1453,6 @@ class Compiler extends Parser with ConstTable, HetuRef {
 
     if (elseBranch != null) {
       bytesBuilder.add(elseBranch);
-      bytesBuilder.addByte(HTOpCode.goto);
-      bytesBuilder.add(_uint16(offsetIp + endIp));
     }
 
     return bytesBuilder.toBytes();
