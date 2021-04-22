@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:pub_semver/pub_semver.dart';
@@ -1030,7 +1031,10 @@ class Hetu extends Interpreter {
         }
         //如果是Dart对象
         else {
-          final typeString = object.runtimeType.toString();
+          var typeString = object.runtimeType.toString();
+          if (object is Timer) {
+            typeString = 'Timer';
+          }
           final id = HTTypeId.parseBaseTypeId(typeString);
           final externClass = fetchExternalClass(id);
           _curValue = externClass.instanceMemberGet(object, key);
