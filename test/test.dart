@@ -8,11 +8,12 @@ void main() async {
       when(expr) {
         0: return '0'
         1: return '1'
+        else: return 'else'
       }
-      return ''
+      return 'missed'
     }
 
-    print(getID(5 - 4))
+    print(getID(5 - 2))
 
   
     ''', codeType: CodeType.script);
