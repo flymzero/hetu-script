@@ -4,12 +4,16 @@ void main() async {
   var hetu = Hetu();
   await hetu.init();
   await hetu.eval(r'''
-      fun whenSwitch() {
-        var i = 4
-          when (i % 2) {
-            0: {print('even')}
-            1: {print('odd')}
-          }
+    fun getID(expr) {
+      when(expr) {
+        0: return '0'
+        1: return '1'
       }
-      ''', invokeFunc: 'whenSwitch');
+      return ''
+    }
+
+    print(getID(5 - 4))
+
+  
+    ''', codeType: CodeType.script);
 }
