@@ -4,8 +4,14 @@ void main() async {
   var hetu = Hetu();
   await hetu.init();
   await hetu.eval(r'''
-      fun escape() {
-          print('a\nb')
+    fun getID(expr) {
+      when {
+        (1 > 3) : return '0'
+        (1 > 5) : return '1'
+        else : return 'else'
       }
-      ''', invokeFunc: 'escape');
+      return 'missed'
+    }
+    print(getID(5 - 2))
+    ''', codeType: CodeType.script);
 }
