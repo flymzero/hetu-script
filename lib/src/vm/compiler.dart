@@ -333,17 +333,19 @@ class Compiler extends Parser with ConstTable, HetuRef {
         // 函数块中不能出现extern或者static关键字的声明
         switch (curTok.type) {
           case HTLexicon.VAR:
-            final decl = _parseVarStmt(isDynamic: true);
+            final decl =
+                _parseVarStmt(isDynamic: true, isLateInitialize: false);
             final id = _readId(decl);
             _curBlock.varDecls[id] = decl;
             break;
           case HTLexicon.LET:
-            final decl = _parseVarStmt();
+            final decl = _parseVarStmt(isLateInitialize: false);
             final id = _readId(decl);
             _curBlock.varDecls[id] = decl;
             break;
           case HTLexicon.CONST:
-            final decl = _parseVarStmt(isImmutable: true);
+            final decl =
+                _parseVarStmt(isImmutable: true, isLateInitialize: false);
             final id = _readId(decl);
             _curBlock.varDecls[id] = decl;
             break;
@@ -1221,6 +1223,7 @@ class Compiler extends Parser with ConstTable, HetuRef {
     bytesBuilder.addByte(0); // bool: isMember
     bytesBuilder.addByte(0); // bool: isStatic
     bytesBuilder.addByte(0); // bool: hasTypeId
+    bytesBuilder.addByte(0); // bool: isLateInitialize
 
     if (initializer != null) {
       bytesBuilder.addByte(1); // bool: has initializer
@@ -1500,7 +1503,8 @@ class Compiler extends Parser with ConstTable, HetuRef {
       bool isMember = false,
       bool isStatic = false,
       bool endOfStatement = false,
-      Uint8List? initializer}) {
+      Uint8List? initializer,
+      bool isLateInitialize = true}) {
     advance(1);
     var id = match(HTLexicon.identifier).lexeme;
 
@@ -1519,6 +1523,7 @@ class Compiler extends Parser with ConstTable, HetuRef {
     bytesBuilder.addByte(isImmutable ? 1 : 0);
     bytesBuilder.addByte(isMember ? 1 : 0);
     bytesBuilder.addByte(isStatic ? 1 : 0);
+    bytesBuilder.addByte(isLateInitialize ? 1 : 0);
 
     if (expect([HTLexicon.colon], consume: true)) {
       bytesBuilder.addByte(1); // bool: has typeid
