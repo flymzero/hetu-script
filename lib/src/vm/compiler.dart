@@ -333,21 +333,23 @@ class Compiler extends Parser with ConstTable, HetuRef {
         // 函数块中不能出现extern或者static关键字的声明
         switch (curTok.type) {
           case HTLexicon.VAR:
-            final decl =
-                _parseVarStmt(isDynamic: true, isLateInitialize: false);
-            final id = _readId(decl);
-            _curBlock.varDecls[id] = decl;
+            final decl = _parseVarStmt(
+                isDynamic: true,
+                isLateInitialize: false,
+                forwardDeclaration: false);
+            bytesBuilder.add(decl);
             break;
           case HTLexicon.LET:
-            final decl = _parseVarStmt(isLateInitialize: false);
-            final id = _readId(decl);
-            _curBlock.varDecls[id] = decl;
+            final decl = _parseVarStmt(
+                isLateInitialize: false, forwardDeclaration: false);
+            bytesBuilder.add(decl);
             break;
           case HTLexicon.CONST:
-            final decl =
-                _parseVarStmt(isImmutable: true, isLateInitialize: false);
-            final id = _readId(decl);
-            _curBlock.varDecls[id] = decl;
+            final decl = _parseVarStmt(
+                isImmutable: true,
+                isLateInitialize: false,
+                forwardDeclaration: false);
+            bytesBuilder.add(decl);
             break;
           case HTLexicon.FUN:
             if (peek(1).type == HTLexicon.identifier) {
@@ -1504,7 +1506,8 @@ class Compiler extends Parser with ConstTable, HetuRef {
       bool isStatic = false,
       bool endOfStatement = false,
       Uint8List? initializer,
-      bool isLateInitialize = true}) {
+      bool isLateInitialize = true,
+      bool forwardDeclaration = true}) {
     advance(1);
     var id = match(HTLexicon.identifier).lexeme;
 
@@ -1517,6 +1520,9 @@ class Compiler extends Parser with ConstTable, HetuRef {
     }
 
     final bytesBuilder = BytesBuilder();
+    if (!forwardDeclaration) {
+      bytesBuilder.addByte(HTOpCode.varDecl);
+    }
     bytesBuilder.add(_shortUtf8String(id));
     bytesBuilder.addByte(isDynamic ? 1 : 0);
     bytesBuilder.addByte(isExtern ? 1 : 0);

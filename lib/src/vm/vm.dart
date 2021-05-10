@@ -509,6 +509,9 @@ class Hetu extends Interpreter {
             _handleVarDecl();
           }
           break;
+        case HTOpCode.varDecl:
+          _handleVarDecl();
+          break;
         case HTOpCode.ifStmt:
           bool condition = _curValue;
           final thenBranchLength = _curCode.readUint16();
