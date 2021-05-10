@@ -72,7 +72,7 @@ class Hetu extends Interpreter {
 
   HTClass? _curClass;
 
-  var _regIndex = -1;
+  var _regIndex = 0;
   final _registers =
       List<dynamic>.filled(HTRegIdx.length, null, growable: true);
 
@@ -352,30 +352,39 @@ class Hetu extends Interpreter {
   /// Once changed into a new module, will open a new area of register space
   /// Every register space holds its own temporary values.
   /// Such as currrent value, current symbol, current line & column, etc.
-  dynamic execute({String? moduleUniqueKey, int? ip, HTNamespace? namespace}) {
+  dynamic execute(
+      {String? moduleUniqueKey,
+      int? ip,
+      HTNamespace? namespace,
+      bool moveRegIndex = false}) {
     final savedModuleUniqueKey = curModuleUniqueKey;
     final savedIp = _curCode.ip;
     final savedNamespace = _curNamespace;
 
     var codeChanged = false;
     var ipChanged = false;
+    var regIndexMoved = moveRegIndex;
     if (moduleUniqueKey != null && (curModuleUniqueKey != moduleUniqueKey)) {
       _curModuleUniqueKey = moduleUniqueKey;
       _curCode = _modules[moduleUniqueKey]!;
       codeChanged = true;
       ipChanged = true;
+      regIndexMoved = true;
     }
     if (ip != null && _curCode.ip != ip) {
       _curCode.ip = ip;
       ipChanged = true;
+      regIndexMoved = true;
     }
     if (namespace != null && _curNamespace != namespace) {
       _curNamespace = namespace;
     }
 
-    ++_regIndex;
-    if (_registers.length <= _regIndex * HTRegIdx.length) {
-      _registers.length += HTRegIdx.length;
+    if (regIndexMoved) {
+      ++_regIndex;
+      if (_registers.length <= _regIndex * HTRegIdx.length) {
+        _registers.length += HTRegIdx.length;
+      }
     }
 
     final result = _execute();
@@ -389,7 +398,9 @@ class Hetu extends Interpreter {
       _curCode.ip = savedIp;
     }
 
-    --_regIndex;
+    if (regIndexMoved) {
+      --_regIndex;
+    }
 
     _curNamespace = savedNamespace;
 
@@ -614,10 +625,10 @@ class Hetu extends Interpreter {
         }
         break;
       case HTValueTypeCode.group:
-        _curValue = execute();
+        _curValue = execute(moveRegIndex: true);
         break;
       case HTValueTypeCode.tuple:
-        _curValue = execute();
+        _curValue = execute(moveRegIndex: true);
         break;
       case HTValueTypeCode.list:
         final list = [];
@@ -1093,7 +1104,6 @@ class Hetu extends Interpreter {
     final isImmutable = _curCode.readBool();
     final isMember = _curCode.readBool();
     final isStatic = _curCode.readBool();
-    final isLateInit = _curCode.readBool();
 
     HTTypeId? declType;
     final hasTypeId = _curCode.readBool();
@@ -1117,10 +1127,6 @@ class Hetu extends Interpreter {
         isImmutable: isImmutable,
         isMember: isMember,
         isStatic: isStatic);
-
-    if (!isLateInit) {
-      decl.initialize();
-    }
 
     if (!isMember || isStatic) {
       _curNamespace.define(decl);
