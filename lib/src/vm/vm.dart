@@ -247,10 +247,19 @@ class Hetu extends Interpreter {
   @override
   void handleError(Object error, [StackTrace? stack]) {
     var sb = StringBuffer();
+    var limitLines = 5;
     for (var funcName in HTFunction.callStack) {
       sb.writeln('  $funcName');
+      limitLines--;
+      if (limitLines <= 0) {
+        break;
+      }
     }
-    sb.writeln('\n$stack');
+    limitLines = 5;
+    var stacklines = stack.toString().split('\n');
+    for (var i = 0; i < 5; ++i) {
+      sb.writeln('\n${stacklines[i]}');
+    }
     var callStack = sb.toString();
 
     if (error is! HTInterpreterError) {
@@ -297,10 +306,20 @@ class Hetu extends Interpreter {
       bytesBuilder.add(bytes);
     } catch (e, stack) {
       var sb = StringBuffer();
+      var limitLines = 5;
       for (var funcName in HTFunction.callStack) {
         sb.writeln('  $funcName');
+        limitLines--;
+        if (limitLines <= 0) {
+          break;
+        }
       }
-      sb.writeln('\n$stack');
+      limitLines = 5;
+      var stacklines = stack.toString().split('\n');
+      for (var i = 0; i < 5; ++i) {
+        sb.writeln('\n${stacklines[i]}');
+      }
+
       var callStack = sb.toString();
 
       if (e is! HTInterpreterError) {
