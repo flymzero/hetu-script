@@ -464,6 +464,7 @@ class Hetu extends Interpreter {
           final breakLength = _curCode.readUint16();
           _loops.add(_LoopInfo(_curCode.ip, _curCode.ip + continueLength,
               _curCode.ip + breakLength, _curNamespace));
+          _curLoopCount += 1;
           break;
         case HTOpCode.breakLoop:
           _curCode.ip = _loops.last.breakIp;
@@ -491,8 +492,11 @@ class Hetu extends Interpreter {
           return _curValue;
         case HTOpCode.endOfFunc:
           final loopCount = _curLoopCount;
-          for (var i = 0; i < loopCount; ++i) {
-            _loops.removeLast();
+          if (loopCount > 0) {
+            for (var i = 0; i < loopCount; ++i) {
+              _loops.removeLast();
+            }
+            _curLoopCount = 0;
           }
           return _curValue;
         case HTOpCode.constTable:
@@ -543,6 +547,7 @@ class Hetu extends Interpreter {
           if (hasCondition && !_curValue) {
             _curCode.ip = _loops.last.breakIp;
             _loops.removeLast();
+            _curLoopCount -= 1;
           }
           break;
         case HTOpCode.doStmt:
