@@ -1061,6 +1061,9 @@ class Hetu extends Interpreter {
           if (object is Timer) {
             typeString = 'Timer';
           }
+          if (containsExternalClassMapping(typeString)) {
+            typeString = fetchExternalClassMapping(typeString)!;
+          }
           final id = HTTypeId.parseBaseTypeId(typeString);
           final externClass = fetchExternalClass(id);
           _curValue = externClass.instanceMemberGet(object, key);

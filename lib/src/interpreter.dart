@@ -175,7 +175,11 @@ abstract class Interpreter {
 
       return HTExternObject(object);
     } else {
-      final typeString = object.runtimeType.toString();
+      var typeString = object.runtimeType.toString();
+      //检查是否有类的映射关系
+      if (containsExternalClassMapping(typeString)) {
+        typeString = _externClassMapping[typeString]!;
+      }
       final id = HTTypeId.parseBaseTypeId(typeString);
       if (containsExternalClass(id)) {
         try {
@@ -201,8 +205,16 @@ abstract class Interpreter {
   final _externClasses = <String, HTExternalClass>{};
   final _externFuncs = <String, Function>{};
   final _externFuncTypeUnwrappers = <String, HTExternalFunctionTypedef>{};
+  final _externClassMapping = <String, String>{};
 
   bool containsExternalClass(String id) => _externClasses.containsKey(id);
+
+  bool containsExternalClassMapping(String id) =>
+      _externClassMapping.containsKey(id);
+
+  String? fetchExternalClassMapping(String id) {
+    return _externClassMapping[id];
+  }
 
   /// 注册外部类，以访问外部类的构造函数和static成员
   /// 在脚本中需要存在对应的extern class声明
@@ -247,5 +259,12 @@ abstract class Interpreter {
     }
     final unwrapFunc = _externFuncTypeUnwrappers[id]!;
     return unwrapFunc(function);
+  }
+
+  void bindExternalClassMapping(String id, String extendClass) {
+    if (_externClassMapping.containsKey(id)) {
+      throw HTErrorDefinedRuntime(id);
+    }
+    _externClassMapping[id] = extendClass;
   }
 }
